@@ -197,6 +197,7 @@ public class BlackJack {
             int bet = getPlayerBet(scan, playerCash, minBetAmount);
 
             // subtract from player money
+            boolean hasDoubleMoney = playerCash >= bet *2;
             playerCash -= bet;
 
             // Deal cards
@@ -216,7 +217,7 @@ public class BlackJack {
 
 
             boolean isFirstHand = true;
-            boolean hasDoubleMoney = playerCash >= bet *2;
+
             // player could immediately win, check for win
             while (scoreHand(playerCards) < 21) { // only continue if player hasn't already won
 
