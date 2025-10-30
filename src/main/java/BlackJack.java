@@ -120,8 +120,9 @@ public class BlackJack {
             } else if (playerScore > dealerScore) {
                 System.out.println("You win! :)\n");
                 return bet * 2;
-            } else if () {
-
+            } else if (playerScore == dealerScore) {
+                System.out.println("Push, Money back \n");
+                return bet;
             } else {
                 System.out.println("Dealer wins :(\n");
                 return 0;
@@ -157,11 +158,26 @@ public class BlackJack {
         return keepPlaying;
     }
 
+    private static void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
+    private static void printTable(ArrayList<String> dealer, ArrayList<String> player, Visualizer vis) {
+        clearScreen();
+        System.out.println(String.format("Dealer Hand:"));
+        vis.printHand(dealer);
+        System.out.println(String.format("Player Hand:"));
+        vis.printHand(player);
+    }
+
 
     public static void main(String[] args) {
         System.out.println("BlackJack");
         final int STARTING_CASH = 1000;
         Scanner scan = new Scanner(System.in);
+
+        Visualizer visualizer = new Visualizer();
 
         int playerCash = STARTING_CASH;
         int minBetAmount = 10;
@@ -175,6 +191,7 @@ public class BlackJack {
             // Initialize Round Hands
             ArrayList<String> dealerCards = new ArrayList<>();
             ArrayList<String> playerCards = new ArrayList<>();
+            ArrayList<String> dealerHidden = new ArrayList<>();
 
             // choose bet amount
             int bet = getPlayerBet(scan, playerCash, minBetAmount);
@@ -185,12 +202,17 @@ public class BlackJack {
             // Deal cards
             dealerCards.add(deck.drawCard());
             dealerCards.add(deck.drawCard());
+            dealerHidden.add(dealerCards.get(0));
+            dealerHidden.add("Blank");
             playerCards.add(deck.drawCard());
             playerCards.add(deck.drawCard());
 
+            //
+
             // visualize cards, dealer only shows one
-            System.out.println(String.format("Dealer Hand: %s", String.valueOf(dealerCards)));
-            System.out.println(String.format("Player Hand: %s", String.valueOf(playerCards)));
+//            System.out.println(String.format("Dealer Hand: %s", String.valueOf(dealerCards)));
+//            System.out.println(String.format("Player Hand: %s", String.valueOf(playerCards)));
+            printTable(dealerHidden, playerCards, visualizer);
 
 
             boolean isFirstHand = true;
@@ -207,9 +229,8 @@ public class BlackJack {
                     System.out.println("You hit!");
                     playerCards.add(deck.drawCard());
                     //TODO visualize hand
-                    System.out.println("\n\n");
-                    System.out.println(String.format("Dealer Hand: %s", String.valueOf(dealerCards)));
-                    System.out.println(String.format("Player Hand: %s", String.valueOf(playerCards)));
+                    //System.out.println("\n\n");
+                    printTable(dealerHidden, playerCards, visualizer);
                         //Visualize entire 'table' including dealer hand and my hand
                 } else if (choice.equals(DOUBLE)) {
                     playerCash -= bet;
@@ -227,9 +248,10 @@ public class BlackJack {
 
             // Dealer play
             while (scoreHand(dealerCards) < 17 && handActive) {
+                printTable(dealerCards, playerCards, visualizer);
                 dealerCards.add(deck.drawCard());
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                 } catch (Exception e) {
                     continue;
                 }
@@ -240,8 +262,7 @@ public class BlackJack {
             int dealerScore = scoreHand(dealerCards);
             int playerScore = scoreHand(playerCards);
 
-            System.out.println(String.format("Dealer Hand: %s", String.valueOf(dealerCards)));
-            System.out.println(String.format("Player Hand: %s", String.valueOf(playerCards)));
+            printTable(dealerCards, playerCards, visualizer);
 
             // Pay player
             playerCash += calculateHandOutcome(bet, playerScore, dealerScore);
