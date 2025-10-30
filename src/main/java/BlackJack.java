@@ -1,64 +1,264 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.Set;
+
 public class BlackJack {
+
+    // private int currentBet;
+    private static String DOUBLE = "double";
+    private static String HIT = "hit";
+    private static String STAND = "stand";
+    private static String SPLIT = "split";
+
+    private static int getPlayerBet(Scanner scan, int playerCash, int min_bet_amount) {
+        boolean invalidInput = true;
+
+        //Scanner scan = new Scanner(System.in);
+        int bet = min_bet_amount;
+        do {
+            System.out.println(String.format("Available Cash: %d", playerCash));
+            System.out.print("Bet amount : ");
+            String input = scan.nextLine();
+            try {
+                bet = Integer.parseInt(input);
+            } catch (Exception e){
+                System.out.println("Not a valid bet number.");
+                continue;
+            }
+            if ((bet < min_bet_amount) || (bet > playerCash)) {
+                System.out.println(String.format("Not a valid bet amount. Minimum bet amount is %d and Max bet amount is %d", min_bet_amount, playerCash));
+            } else {
+                invalidInput = false;
+            }
+        } while (invalidInput);
+        return bet;
+    }
+
+    private static String getUserPlay(Scanner scan, boolean isFirstHand, boolean hasDoubleMoney) {
+        // Gets the players play choice
+        boolean invalidInput = true;
+
+        //Scanner scan = new Scanner(System.in);
+        Set<String> playerOptions;
+        if (isFirstHand && hasDoubleMoney) {
+            playerOptions = Set.of(HIT, STAND, DOUBLE);
+        } else {
+            playerOptions = Set.of(HIT, STAND);
+        }
+        String option = "";
+
+        do {
+            System.out.println(String.format("Play options are : %s", String.valueOf(playerOptions)));
+            System.out.print("What do you want to do : ");
+            option = scan.nextLine();
+            option = option.toLowerCase().strip();
+            if (!playerOptions.contains(option)) {
+                System.out.println("\tNot a valid choice");
+            } else {
+                invalidInput = false;
+            }
+
+        } while (invalidInput);
+
+        return option;
+    }
+
+    private static int scoreHand(ArrayList<String> hand) {
+        int score = 0;
+        int aCount = 0;
+        for (String card : hand) {
+            char cardValue = card.charAt(0);
+            switch (cardValue) {
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    score += cardValue - '0';
+                        break;
+                case 'T':
+                case 'J':
+                case 'Q':
+                case 'K':
+                    score += 10;
+                    break;
+                case 'A':
+                    score += 11;
+                    aCount++;
+                    break;
+                default:
+                    throw new RuntimeException("Unexpected card found");
+            }
+        }
+        while (score > 21 && aCount > 0) { // account for aces as 1 or 11
+            score -= 10;
+            aCount --;
+        }
+        return score;
+    }
+    
+    private static int calculateHandOutcome(int bet, int playerScore, int dealerScore) {
+        if (playerScore > 21) { // player busts
+            System.out.println("You Bust :(\n");
+            return 0;
+        } else if (playerScore == 21) {
+            if (dealerScore == 21){ // push, nothing happens
+                System.out.println("Push, Money back \n");
+                return bet;
+            } else { // You win + blackjack payout
+                System.out.println("BlackJack! You win!\n");
+                return (bet * 5) / 2;
+            }
+
+        } else { // player < 21
+            if (dealerScore > 21) {
+                System.out.println("Dealer busts, you win! :)\n");
+                return bet * 2;
+            } else if (playerScore > dealerScore) {
+                System.out.println("You win! :)\n");
+                return bet * 2;
+            } else if () {
+
+            } else {
+                System.out.println("Dealer wins :(\n");
+                return 0;
+            }
+        }
+    }
+
+    private static boolean checkPlayNextHand (int playerCash, int startingCash, Scanner scan) {
+        boolean keepPlaying = false;
+        boolean invalidInput = true;
+        do {
+            System.out.print("Do you want to play another hand? (Y/n): ");
+            String continueInput = scan.nextLine();
+            if (continueInput.equalsIgnoreCase("Y")) {
+                keepPlaying = true;
+                invalidInput = false;
+            } else if (continueInput.equalsIgnoreCase("n")) {
+                int netCash = playerCash - startingCash;
+                if (netCash < 0){
+                    System.out.printf("Yikes! You lost %d dollars.", Math.abs(netCash));
+                }
+                else if (netCash == 0){
+                    System.out.println("You went dead even.");
+                }
+                else {
+                    System.out.printf("Congrats! You took home %d dollars.", (netCash));
+                }
+                invalidInput = false;
+            } else {
+                System.out.println("Invalid input, please enter 'Y' or 'n'");
+            }
+        } while (invalidInput);
+        return keepPlaying;
+    }
+
+
     public static void main(String[] args) {
         System.out.println("BlackJack");
+        final int STARTING_CASH = 1000;
+        Scanner scan = new Scanner(System.in);
 
-        // pseudo code plan
+        int playerCash = STARTING_CASH;
+        int minBetAmount = 10;
 
-        // initialize deck(s)
-            // deck contains 52 standard cards
-            // Ace (A is 1 or 11), 2, 3, 4, ..., 9, 10 (or T), Jack (J is 10), Queen (Q is 10), King (K is 10)
-            // 4 Suits : Hearts (H), Clubs (C), Spades (S), Diamonds (D)
-
-        // set player money
-
-        // player has cards and dealer has cards
-            // player cards and dealer cards should be removed
-                // from remaining deck cards. (Cannot be selected)
-
+        // Initialize Deck
+        Deck deck = new Deck(2);
 
         // Simulate rounds
+        while (playerCash > 0) {
+
+            // Initialize Round Hands
+            ArrayList<String> dealerCards = new ArrayList<>();
+            ArrayList<String> playerCards = new ArrayList<>();
 
             // choose bet amount
+            int bet = getPlayerBet(scan, playerCash, minBetAmount);
+
             // subtract from player money
+            playerCash -= bet;
 
             // Deal cards
-                // Initialize Player and Dealer hands
+            dealerCards.add(deck.drawCard());
+            dealerCards.add(deck.drawCard());
+            playerCards.add(deck.drawCard());
+            playerCards.add(deck.drawCard());
 
             // visualize cards, dealer only shows one
-                // Map between Card String and ANSI? Display of Card
-                    // Key: Card String
-                    // Value: Card Display (print out value)
+            System.out.println(String.format("Dealer Hand: %s", String.valueOf(dealerCards)));
+            System.out.println(String.format("Player Hand: %s", String.valueOf(playerCards)));
 
+
+            boolean isFirstHand = true;
+            boolean hasDoubleMoney = playerCash >= bet *2;
             // player could immediately win, check for win
+            while (scoreHand(playerCards) < 21) { // only continue if player hasn't already won
 
-            // first round has stand, hit (split, double)
+                // first round has stand, hit (split, double)
+                // 1, 2, 3, 4 as options
+                String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney);
+                isFirstHand = false;
+                if (choice.equals(HIT)) {
 
-            // each subsequent round a player has options
-                // keep playing, hit( add card to player hand)
-                // quit, stand (satisfied with current hand)
+                    System.out.println("You hit!");
+                    playerCards.add(deck.drawCard());
+                    //TODO visualize hand
+                    System.out.println("\n\n");
+                    System.out.println(String.format("Dealer Hand: %s", String.valueOf(dealerCards)));
+                    System.out.println(String.format("Player Hand: %s", String.valueOf(playerCards)));
+                        //Visualize entire 'table' including dealer hand and my hand
+                } else if (choice.equals(DOUBLE)) {
+                    playerCash -= bet;
+                    bet += bet;
+                    System.out.printf("You doubled, upping the stakes! New bet amount: %d\n", bet);
+                } else if (choice.equals(SPLIT)) {
+                    //TODO: implement this
+                } else { // stand
+                    break;
+                }
 
-                // possible outcomes for each round
-                    // player busts
-                    // player blackjacks
-                    // player total under 21
+            }
+            // immediately end, no need to show dealer cards
+            boolean handActive = !(scoreHand(playerCards) > 21) ;
 
-                // update player money with win/lose amount (blackjack gets 1.5)
+            // Dealer play
+            while (scoreHand(dealerCards) < 17 && handActive) {
+                dealerCards.add(deck.drawCard());
+                try {
+                    Thread.sleep(500);
+                } catch (Exception e) {
+                    continue;
+                }
+                //TODO visualize hand actually not sure we need it here
+                    // visualize 'table'
+            }
+            // determine outcome of hand
+            int dealerScore = scoreHand(dealerCards);
+            int playerScore = scoreHand(playerCards);
 
-            // Dealer rules
-            // as long as player didnt bust, dealer must play similar rounds
-            // dealer must hit until at least 17 is shown. In a tie, no money is gained or lost,
-            // including both blackjack.
+            System.out.println(String.format("Dealer Hand: %s", String.valueOf(dealerCards)));
+            System.out.println(String.format("Player Hand: %s", String.valueOf(playerCards)));
 
-            // Check winner of round
-                // Pay player if player win or give money back for tie
+            // Pay player
+            playerCash += calculateHandOutcome(bet, playerScore, dealerScore);
 
-            // After each round, check player money
-                // Can only bet less than or equal to currently money
+            deck.reset();
 
-            // if player out of money, game over!
-                // ( do we add a credit line? -_- )
+            System.out.printf("You now have %d dollars left.\n", playerCash);
+            if (playerCash == 0) break;
 
             // see if player wants to quit (take hypothetical money home)
+            if (!checkPlayNextHand(playerCash,STARTING_CASH, scan)) break;
+        }
 
+        // if player out of money, game over!
+        if (playerCash <= 0) {
+            System.out.println("You are out of money");
+            System.out.println("GAME OVER");
+        }
     }
 }
