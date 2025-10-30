@@ -1,0 +1,63 @@
+import java.io.File;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+/*
+TO USE VISUALIZER, CALL   printHand(List<String> hand);   WITH AN ARRAYLIST OF STRINGS AS AN ARGUMENT
+ALL CARDS USE THE NOTATION OF 'value/suit' e.g. "AH" (Ace of Hearts), "KD" (Kind of Diamonds), OR "Blank" (blank)
+ */
+public class Visualizer{
+    String[] cards;
+    HashMap<String, Integer> cardIndex;
+
+    public Visualizer(){
+        makeMap();
+        try{
+            makeCards();
+        } catch (Exception e){ IO.print(e); }
+    }
+
+    public void printHand(List<String> hand){
+        String result = "";
+        ArrayList<Integer> indexes = new ArrayList<>();
+        for(String card: hand){
+            indexes.add(cardIndex.get(card));
+        }
+        for(int i = 0; i < 11; i++){
+            for(int index : indexes){
+                result += cards[index].substring(i*17, (i*17)+17) + "\t";
+            }
+            result += "\n";
+        }
+        IO.print(result);
+    }
+
+    private void makeCards() throws IOException{
+        cards = new String[53];
+        BufferedReader br = new BufferedReader(new FileReader("./src/main/cards.txt"));
+        for(int i = 0; i < cards.length; i++){
+            cards[i] = "";
+            for(int j = 0; j < 11; j++){
+                cards[i] += br.readLine();
+            }
+        }
+    }
+
+    private void makeMap(){
+        cardIndex = new HashMap<>();
+        String[] values = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+        String[] suits = {"H", "D", "C", "S"};
+        int index = 0;
+        for (String suit: suits){
+            for (String value: values){
+                cardIndex.put(value + suit, index);
+                index++;
+            }
+        }
+        cardIndex.put("Blank", index);
+    }
+
+}
