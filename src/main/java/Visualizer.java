@@ -12,6 +12,8 @@ ALL CARDS USE THE NOTATION OF 'value/suit' e.g. "AH" (Ace of Hearts), "KD" (Kind
 public class Visualizer{
     String[] cards;
     HashMap<String, Integer> cardIndex;
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_RED = "\u001B[31m";
 
     public Visualizer(){
         makeMap();
@@ -23,12 +25,24 @@ public class Visualizer{
     public void printHand(List<String> hand){
         String result = "";
         ArrayList<Integer> indexes = new ArrayList<>();
+        ArrayList<Boolean> isRed = new ArrayList<>();
         for(String card: hand){
             indexes.add(cardIndex.get(card));
+            if ((card.charAt(1) == 'H') || (card.charAt(1) == 'D')) {
+                isRed.add(true);
+            } else {
+                isRed.add(false);
+            }
         }
         for(int i = 0; i < 11; i++){
-            for(int index : indexes){
-                result += cards[index].substring(i*17, (i*17)+17) + "\t";
+            for (int j = 0; j < indexes.size(); j++) {
+                int index = indexes.get(j);
+                boolean index_is_red = isRed.get(j);
+                if (index_is_red) {
+                    result += ANSI_RED + cards[index].substring(i*17, (i*17)+17) + ANSI_RESET + "\t";
+                } else {
+                    result += cards[index].substring(i*17, (i*17)+17) + "\t";
+                }
             }
             result += "\n";
         }
