@@ -81,6 +81,36 @@ public class Visualizer{
         IO.print(result);
     }
 
+    public void printHand_with_stand(List<String> hand) {
+        String result = "";
+        ArrayList<Integer> indexes = new ArrayList<>();
+        ArrayList<Boolean> isRed = new ArrayList<>();
+        for(String card: hand){
+            indexes.add(cardIndex.get(card));
+            if ((card.charAt(1) == 'H') || (card.charAt(1) == 'D')) {
+                isRed.add(true);
+            } else {
+                isRed.add(false);
+            }
+        }
+        for(int i = 0; i < 11; i++){
+            for (int j = 0; j < indexes.size(); j++) {
+                int index = indexes.get(j);
+                boolean index_is_red = isRed.get(j);
+                if (index_is_red) {
+                    result += ANSI_RED + cards[index].substring(i*17, (i*17)+17) + ANSI_RESET + "\t";
+                } else {
+                    result += cards[index].substring(i*17, (i*17)+17) + "\t";
+                }
+            }
+
+            result += stand.substring(i*14, (i*14)+14);
+
+            result += "\n";
+        }
+        IO.print(result);
+    }
+
     private void makeCards() throws IOException{
         cards = new String[53];
         BufferedReader br = new BufferedReader(new FileReader("./src/main/cards.txt"));
@@ -129,6 +159,18 @@ public class Visualizer{
                                         "                        |~~ `." +
                                         " .._                    |___))" +
                                         "    ~--._____________.------' ";
+
+    private static String stand =    "              " +
+                                     "    _.-._     " +
+                                     "   | | | |_   " +
+                                     "   | | | | |  " +
+                                     "   | | | | |  " +
+                                     " _ |  '-._ |  " +
+                                     " \\`\\`-.'-._;  " +
+                                     "  \\    '   |  " +
+                                     "   \\  .`  /   " +
+                                     "    |    |    " +
+                                     "              ";
 
 
     public void printTitle(){

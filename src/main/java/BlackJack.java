@@ -196,6 +196,17 @@ public class BlackJack {
         } catch (Exception e) {}
     }
 
+    private static void printTableStand(ArrayList<String> dealer, ArrayList<String> player, Visualizer vis) {
+        clearScreen();
+        System.out.println(String.format("Dealer Hand:"));
+        vis.printHand(dealer);
+        System.out.println(String.format("Player Hand:"));
+        vis.printHand_with_stand(player);
+        try {
+            Thread.sleep(750);
+        } catch (Exception e) {}
+    }
+
     public static void main(String[] args) {
         final int STARTING_CASH = 1000;
         Scanner scan = new Scanner(System.in);
@@ -302,6 +313,7 @@ public class BlackJack {
                 } else if (choice.equals(SPLIT)) {
                     //TODO: implement this
                 } else { // stand
+                    printTableStand(dealerHidden, playerCards, visualizer);
                     break;
                 }
 
