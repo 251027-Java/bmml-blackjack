@@ -176,11 +176,13 @@ public class BlackJack {
 
 
     public static void main(String[] args) {
-        System.out.println("BlackJack");
         final int STARTING_CASH = 1000;
         Scanner scan = new Scanner(System.in);
 
+        //System.out.println("BlackJack");
         Visualizer visualizer = new Visualizer();
+        clearScreen();
+        visualizer.printTitle();
 
         int playerCash = STARTING_CASH;
         int minBetAmount = 10;
