@@ -314,7 +314,13 @@ public class BlackJack {
                 } else if (choice.equals(DOUBLE)) {
                     playerCash -= bet;
                     bet += bet;
-                    System.out.printf("You doubled, upping the stakes! New bet amount: %d\n", bet);
+                    playerCards.add(deck.drawCard());
+                    printTable(dealerHidden, playerCards, visualizer);
+                    System.out.printf("You doubled, upping the stakes and taking exactly one more card! New bet amount: %d\n", bet);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (Exception e) {}
+                    break;
                 } else if (choice.equals(SPLIT)) {
                     //TODO: implement this
                 } else { // stand
@@ -323,12 +329,11 @@ public class BlackJack {
 
             }
 
-            // **DEALER STILL NEEDS TO PLAY HAND SINCE BOTH CAN BUST AND OUTCOME WOULD BE A PUSH**
             // immediately end, no need to show dealer cards
-            //boolean handActive = !(scoreHand(playerCards) > 21) ;
+            boolean handActive = !(scoreHand(playerCards) > 21) ;
 
             // Dealer play
-            while (scoreHand(dealerCards) < 17) {
+            while (scoreHand(dealerCards) < 17 && handActive) {
                 printTable(dealerCards, playerCards, visualizer);
                 dealerCards.add(deck.drawCard());
                 try {
