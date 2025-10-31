@@ -115,36 +115,37 @@ public class BlackJack {
         return score;
     }
     
-    private static int calculateHandOutcome(int bet, int playerScore, int dealerScore) {
+    private static int calculateHandOutcome(int bet, int playerScore, int dealerScore, boolean split, boolean isFirstHand, int handSize) {
+        String handText = "";
+
+        if (split) {
+            handText = isFirstHand ? "Hand 1 Outcome: " : "Hand 2 Outcome: ";
+        }
+        if (playerScore > 21) { // player busts
+            System.out.println(handText + "You Bust :(\n");
+            return 0;
+        }
         if (playerScore == dealerScore) { // scores are even
-            System.out.println("Push, Money back \n");
+            System.out.println(handText + "Push, Money back \n");
             return bet;
         }
 
-        if (playerScore > 21) { // player busts
-            if (dealerScore > 21){ // both bust
-                System.out.println("You both bust. Push, Money back \n");
-                return bet;
-            }
-            System.out.println("You Bust :(\n");
-            return 0;
-        }
-
-        if (playerScore == 21) { // You win + blackjack payout
-            System.out.println("BlackJack! You win!\n");
+        if (playerScore == 21 && handSize == 2) { // You win + blackjack payout
+            // TODO: fix this
+            System.out.println(handText + "BlackJack! You win!\n");
             return (bet * 5) / 2;
         }
 
         // player < 21
         if (dealerScore > 21) {
-            System.out.println("Dealer busts, you win! :)\n");
+            System.out.println(handText + "Dealer busts, you win! :)\n");
             return bet * 2;
         }
         if (playerScore > dealerScore) {
-            System.out.println("You win! :)\n");
+            System.out.println(handText + "You win! :)\n");
             return bet * 2;
         }
-        System.out.println("Dealer wins :(\n");
+        System.out.println(handText + "Dealer wins :(\n");
         return 0;
     }
 
@@ -198,7 +199,7 @@ public class BlackJack {
         }
     }
 
-    private static ArrayList<ArrayList<String>> splitHand(ArrayList<ArrayList<String>> playerHands,
+    private static void splitHand(ArrayList<ArrayList<String>> playerHands,
                                                    Deck deck) {
 
         ArrayList<String> playerSplitCards = new ArrayList<>();
@@ -210,7 +211,6 @@ public class BlackJack {
         playerHands.set(0, playerCards);
         playerHands.add(playerSplitCards);
 
-        return playerHands;
     }
 
 
@@ -249,10 +249,10 @@ public class BlackJack {
             // Deal cards
             dealerCards.add(deck.drawCard());
             dealerCards.add(deck.drawCard());
-            dealerHidden.add(dealerCards.get(0));
+            dealerHidden.add(dealerCards.getFirst());
             dealerHidden.add("Blank");
-            playerCards.add(deck.drawCard());
-            playerCards.add(deck.drawCard());
+            playerCards.add("AC");
+            playerCards.add("AC");
             playerHands.add(playerCards);
 
             // determine if cards are the same
@@ -270,6 +270,7 @@ public class BlackJack {
 
             boolean isFirstHand = true;
 
+
             // player could immediately win, check for win
             while (scoreHand(playerHands.getFirst()) < 21 || (playerHands.size() != 1 && scoreHand(playerHands.getLast()) < 21)) { //
                 // only continue
@@ -279,7 +280,8 @@ public class BlackJack {
                 // already won
 
                 for (int i =0; i< playerHands.size(); i++) {
-                    if (handStands.get(i)) {
+                    int handScore = scoreHand(playerHands.get(i));
+                    if (handStands.get(i) || handScore >= 21) {
                         continue;
                     }
                     String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney, canSplit, i+1,
@@ -289,17 +291,16 @@ public class BlackJack {
 
                         System.out.println("You hit!");
                         playerHands.get(i).add(deck.drawCard());
-                        //TODO visualize hand
-                        //System.out.println("\n\n");
+
                         printTable(dealerHidden, playerHands, visualizer);
-                        //Visualize entire 'table' including dealer hand and my hand
                     } else if (choice.equals(DOUBLE)) {
                         playerCash -= bet;
                         bet += bet;
                         System.out.printf("You doubled, upping the stakes! New bet amount: %d\n", bet);
                     } else if (choice.equals(SPLIT)) {
                         playerCash -= bet;
-                        playerHands = splitHand(playerHands, deck);
+                        splitHand(playerHands, deck);
+                        i--;
                         printTable(dealerHidden, playerHands, visualizer);
                     } else { // stand
                         handStands.set(i, true);
@@ -309,7 +310,11 @@ public class BlackJack {
                 // 1, 2, 3, 4 as options
                 if (playerHands.size() == 1 && handStands.getFirst()) {
                     break;
-                } else if (handStands.getFirst() && handStands.getLast()){
+                } else if (
+                        (handStands.getFirst() && scoreHand(playerHands.getLast() ) > 21) ||
+                        (handStands.getLast() && scoreHand(playerHands.getFirst()) > 21 ) ||
+                        (handStands.getFirst() && handStands.getLast())
+                ){
                     break;
                 }
 
@@ -339,9 +344,9 @@ public class BlackJack {
             printTable(dealerCards, playerHands, visualizer);
 
             // Pay player
-            playerCash += calculateHandOutcome(bet, playerScore1, dealerScore);
+            playerCash += calculateHandOutcome(bet, playerScore1, dealerScore, playerHands.size() == 2, true, playerHands.getFirst().size());
             if (playerHands.size() != 1) {
-                playerCash += calculateHandOutcome(bet, playerScore2, dealerScore);
+                playerCash += calculateHandOutcome(bet, playerScore2, dealerScore, playerHands.size() == 2, false, playerHands.getLast().size());
             }
 
             deck.reset();
