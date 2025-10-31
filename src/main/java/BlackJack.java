@@ -218,6 +218,25 @@ public class BlackJack {
 //            System.out.println(String.format("Player Hand: %s", String.valueOf(playerCards)));
             printTable(dealerHidden, playerCards, visualizer);
 
+            // If dealer has an Ace, ask player if they want insurance
+            if (dealerCards.get(0).charAt(0) == 'A'){
+                boolean invalidInput = true;
+                while (invalidInput) {
+                    System.out.print("Do you want insurance? (Y/n): ");
+                    String insurance = scan.nextLine();
+                    if (insurance.equalsIgnoreCase("Y")) {
+                        System.out.println("Bet has been halved");
+                        bet = bet/2;
+                        playerCash += bet;
+                        invalidInput = false;
+                    } else if (insurance.equalsIgnoreCase("n")) {
+                        System.out.println("Suit yourself");
+                        invalidInput = false;
+                    } else {
+                        System.out.println("Invalid input, please enter 'Y' or 'n'");
+                    }
+                }
+            }
 
             boolean isFirstHand = true;
 
