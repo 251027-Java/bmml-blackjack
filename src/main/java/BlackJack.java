@@ -174,6 +174,41 @@ public class BlackJack {
         vis.printHand(player);
     }
 
+    private static void printTableHit(ArrayList<String> dealer, ArrayList<String> player, Visualizer vis) {
+        clearScreen();
+        System.out.println(String.format("Dealer Hand:"));
+        vis.printHand(dealer);
+        System.out.println(String.format("Player Hand:"));
+        vis.printHand_with_hit(player, 0);
+        try {
+            Thread.sleep(250);
+        } catch (Exception e) {}
+        clearScreen();
+        System.out.println(String.format("Dealer Hand:"));
+        vis.printHand(dealer);
+        System.out.println(String.format("Player Hand:"));
+        vis.printHand_with_hit(player, 1);
+        try {
+            Thread.sleep(250);
+        } catch (Exception e) {}
+
+        clearScreen();
+        System.out.println(String.format("Dealer Hand:"));
+        vis.printHand(dealer);
+        System.out.println(String.format("Player Hand:"));
+        vis.printHand_with_hit(player, 0);
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {}
+        clearScreen();
+        System.out.println(String.format("Dealer Hand:"));
+        vis.printHand(dealer);
+        System.out.println(String.format("Player Hand:"));
+        vis.printHand_with_hit(player, 1);
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {}
+    }
 
     public static void main(String[] args) {
         System.out.println("BlackJack");
@@ -205,11 +240,30 @@ public class BlackJack {
 
             // Deal cards
             dealerCards.add(deck.drawCard());
-            dealerCards.add(deck.drawCard());
             dealerHidden.add(dealerCards.get(0));
+            printTable(dealerHidden, playerCards, visualizer);
+            try {
+                Thread.sleep(500);
+            } catch (Exception e) {}
+
+            playerCards.add(deck.drawCard());
+            printTable(dealerHidden, playerCards, visualizer);
+            try {
+                Thread.sleep(500);
+            } catch (Exception e) {}
+
+            dealerCards.add(deck.drawCard());
             dealerHidden.add("Blank");
+            printTable(dealerHidden, playerCards, visualizer);
+            try {
+                Thread.sleep(500);
+            } catch (Exception e) {}
+
             playerCards.add(deck.drawCard());
-            playerCards.add(deck.drawCard());
+            printTable(dealerHidden, playerCards, visualizer);
+            try {
+                Thread.sleep(500);
+            } catch (Exception e) {}
 
             //
 
@@ -229,7 +283,7 @@ public class BlackJack {
                 String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney);
                 isFirstHand = false;
                 if (choice.equals(HIT)) {
-
+                    printTableHit(dealerHidden, playerCards, visualizer);
                     System.out.println("You hit!");
                     playerCards.add(deck.drawCard());
                     //TODO visualize hand
