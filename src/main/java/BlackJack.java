@@ -192,7 +192,7 @@ public class BlackJack {
                 System.out.println(String.format("Player Hand:"));
                 vis.printHand(playerHands.get(i));
             } else {
-                System.out.printf(String.format("Player Hand %d:"), i);
+                System.out.printf("Player Hand %d:\n", i+1);
                 vis.printHand(playerHands.get(i));
             }
         }
@@ -208,7 +208,7 @@ public class BlackJack {
         playerCards.add(deck.drawCard());
         playerSplitCards.add(deck.drawCard());
         playerHands.set(0, playerCards);
-        playerHands.set(1, playerSplitCards);
+        playerHands.add(playerSplitCards);
 
         return playerHands;
     }
@@ -279,10 +279,10 @@ public class BlackJack {
                 // already won
 
                 for (int i =0; i< playerHands.size(); i++) {
-                    if (handStands.get(i) || scoreHand(playerHands.get(i)) >= 21) {
+                    if (handStands.get(i)) {
                         continue;
                     }
-                    String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney, canSplit, i,
+                    String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney, canSplit, i+1,
                             playerHands.size());
                     isFirstHand = false;
                     if (choice.equals(HIT)) {
@@ -307,7 +307,9 @@ public class BlackJack {
                 }
                 // first round has stand, hit (split, double)
                 // 1, 2, 3, 4 as options
-                if (!handStands.getFirst() || !handStands.getLast()) {
+                if (playerHands.size() == 1 && handStands.getFirst()) {
+                    break;
+                } else if (handStands.getFirst() && handStands.getLast()){
                     break;
                 }
 
@@ -331,12 +333,16 @@ public class BlackJack {
             }
             // determine outcome of hand
             int dealerScore = scoreHand(dealerCards);
-            int playerScore = scoreHand(playerCards);
+            int playerScore1 = scoreHand(playerHands.getFirst());
+            int playerScore2 = scoreHand(playerHands.getLast());
 
             printTable(dealerCards, playerHands, visualizer);
 
             // Pay player
-            playerCash += calculateHandOutcome(bet, playerScore, dealerScore);
+            playerCash += calculateHandOutcome(bet, playerScore1, dealerScore);
+            if (playerHands.size() != 1) {
+                playerCash += calculateHandOutcome(bet, playerScore2, dealerScore);
+            }
 
             deck.reset();
 
