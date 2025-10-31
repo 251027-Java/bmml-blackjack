@@ -101,33 +101,36 @@ public class BlackJack {
     }
     
     private static int calculateHandOutcome(int bet, int playerScore, int dealerScore) {
+        if (playerScore == dealerScore) { // scores are even
+            System.out.println("Push, Money back \n");
+            return bet;
+        }
+
         if (playerScore > 21) { // player busts
+            if (dealerScore > 21){ // both bust
+                System.out.println("You both bust. Push, Money back \n");
+                return bet;
+            }
             System.out.println("You Bust :(\n");
             return 0;
-        } else if (playerScore == 21) {
-            if (dealerScore == 21){ // push, nothing happens
-                System.out.println("Push, Money back \n");
-                return bet;
-            } else { // You win + blackjack payout
-                System.out.println("BlackJack! You win!\n");
-                return (bet * 5) / 2;
-            }
-
-        } else { // player < 21
-            if (dealerScore > 21) {
-                System.out.println("Dealer busts, you win! :)\n");
-                return bet * 2;
-            } else if (playerScore > dealerScore) {
-                System.out.println("You win! :)\n");
-                return bet * 2;
-            } else if (playerScore == dealerScore) {
-                System.out.println("Push, Money back \n");
-                return bet;
-            } else {
-                System.out.println("Dealer wins :(\n");
-                return 0;
-            }
         }
+
+        if (playerScore == 21) { // You win + blackjack payout
+            System.out.println("BlackJack! You win!\n");
+            return (bet * 5) / 2;
+        }
+
+        // player < 21
+        if (dealerScore > 21) {
+            System.out.println("Dealer busts, you win! :)\n");
+            return bet * 2;
+        }
+        if (playerScore > dealerScore) {
+            System.out.println("You win! :)\n");
+            return bet * 2;
+        }
+        System.out.println("Dealer wins :(\n");
+        return 0;
     }
 
     private static boolean checkPlayNextHand (int playerCash, int startingCash, Scanner scan) {
@@ -244,11 +247,13 @@ public class BlackJack {
                 }
 
             }
+
+            // **DEALER STILL NEEDS TO PLAY HAND SINCE BOTH CAN BUST AND OUTCOME WOULD BE A PUSH**
             // immediately end, no need to show dealer cards
-            boolean handActive = !(scoreHand(playerCards) > 21) ;
+            //boolean handActive = !(scoreHand(playerCards) > 21) ;
 
             // Dealer play
-            while (scoreHand(dealerCards) < 17 && handActive) {
+            while (scoreHand(dealerCards) < 17) {
                 printTable(dealerCards, playerCards, visualizer);
                 dealerCards.add(deck.drawCard());
                 try {
