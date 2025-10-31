@@ -107,10 +107,6 @@ public class BlackJack {
         }
 
         if (playerScore > 21) { // player busts
-            if (dealerScore > 21){ // both bust
-                System.out.println("You both bust. Push, Money back \n");
-                return bet;
-            }
             System.out.println("You Bust :(\n");
             return 0;
         }
