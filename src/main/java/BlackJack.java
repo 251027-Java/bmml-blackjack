@@ -352,15 +352,16 @@ public class BlackJack {
             deck.reset();
 
             System.out.printf("You now have %d dollars left.\n", playerCash);
-            if (playerCash == 0) break;
+            if (playerCash <= minBetAmount) break;
 
             // see if player wants to quit (take hypothetical money home)
             if (!checkPlayNextHand(playerCash,STARTING_CASH, scan)) break;
         }
 
         // if player out of money, game over!
-        if (playerCash <= 0) {
-            System.out.println("You are out of money");
+        if (playerCash <= minBetAmount) {
+            if (playerCash == 0){ System.out.println("You are out of money"); }
+            else { System.out.printf("You don't have enough to make a minimum bet of $%d\n", minBetAmount); }
             System.out.println("GAME OVER");
         }
     }
