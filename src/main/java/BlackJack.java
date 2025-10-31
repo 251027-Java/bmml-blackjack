@@ -107,10 +107,6 @@ public class BlackJack {
         }
 
         if (playerScore > 21) { // player busts
-            if (dealerScore > 21){ // both bust
-                System.out.println("You both bust. Push, Money back \n");
-                return bet;
-            }
             System.out.println("You Bust :(\n");
             return 0;
         }
@@ -296,7 +292,13 @@ public class BlackJack {
                 } else if (choice.equals(DOUBLE)) {
                     playerCash -= bet;
                     bet += bet;
-                    System.out.printf("You doubled, upping the stakes! New bet amount: %d\n", bet);
+                    playerCards.add(deck.drawCard());
+                    printTable(dealerHidden, playerCards, visualizer);
+                    System.out.printf("You doubled, upping the stakes and taking exactly one more card! New bet amount: %d\n", bet);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (Exception e) {}
+                    break;
                 } else if (choice.equals(SPLIT)) {
                     //TODO: implement this
                 } else { // stand
