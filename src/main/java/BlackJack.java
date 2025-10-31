@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -239,6 +240,12 @@ public class BlackJack {
         } catch (Exception e) {}
     }
 
+    private static boolean handNotOver(ArrayList<ArrayList<String>> playerHands, ArrayList<Boolean> handStands){
+        return (scoreHand(playerHands.getFirst()) < 21 && playerHands.size()==1) ||
+                (scoreHand(playerHands.getFirst()) < 21 && scoreHand(playerHands.getFirst()) < 21) ||
+                (scoreHand(playerHands.getLast()) < 21 && handStands.getLast());
+    }
+
     public static void main(String[] args) {
         final int STARTING_CASH = 1000;
         Scanner scan = new Scanner(System.in);
@@ -263,6 +270,7 @@ public class BlackJack {
             ArrayList<String> playerCards = new ArrayList<>();
             ArrayList<String> dealerHidden = new ArrayList<>();
             ArrayList<Boolean> handStands = new ArrayList<>();
+            playerHands.add(playerCards);
             handStands.add(false);
             handStands.add(false);
 
@@ -275,36 +283,36 @@ public class BlackJack {
 
             // Deal cards
             dealerCards.add(deck.drawCard());
-            dealerHidden.add(dealerCards.get(0));
-            printTable(dealerHidden, playerCards, visualizer);
+            dealerHidden.add(dealerCards.getFirst());
+            printTable(dealerHidden, playerHands, visualizer);
             try {
                 Thread.sleep(500);
             } catch (Exception e) {}
 
             playerCards.add(deck.drawCard());
-            printTable(dealerHidden, playerCards, visualizer);
+            printTable(dealerHidden, playerHands, visualizer);
             try {
                 Thread.sleep(500);
             } catch (Exception e) {}
 
             dealerCards.add(deck.drawCard());
             dealerHidden.add("Blank");
-            printTable(dealerHidden, playerCards, visualizer);
+            printTable(dealerHidden, playerHands, visualizer);
             try {
                 Thread.sleep(500);
             } catch (Exception e) {}
 
             playerCards.add(deck.drawCard());
-            printTable(dealerHidden, playerCards, visualizer);
+            printTable(dealerHidden, playerHands, visualizer);
             try {
                 Thread.sleep(500);
             } catch (Exception e) {}
 
-            printTable(dealerHidden, playerCards, visualizer);
+            printTable(dealerHidden, playerHands, visualizer);
             
 
             // If dealer has an Ace, ask player if they want insurance
-            if (dealerCards.get(0).charAt(0) == 'A'){
+            if (dealerCards.getFirst().charAt(0) == 'A'){
                 boolean invalidInput = true;
                 while (invalidInput) {
                     System.out.print("Do you want insurance? (Y/n): ");
@@ -324,22 +332,18 @@ public class BlackJack {
             }
 
             boolean isFirstHand = true;
-
+            boolean canSplit = playerHands.getFirst().getFirst().charAt(0) == playerHands.getFirst().getLast().charAt(0);
 
             // player could immediately win, check for win
-            while (scoreHand(playerHands.getFirst()) < 21 || (playerHands.size() != 1 && scoreHand(playerHands.getLast()) < 21)) { //
-                // only continue
-                // if
-                // player
-                // hasn't
-                // already won
+            while (handNotOver(playerHands, handStands)) { //
+
 
                 for (int i =0; i< playerHands.size(); i++) {
                     int handScore = scoreHand(playerHands.get(i));
                     if (handStands.get(i) || handScore >= 21) {
                         continue;
                     }
-                    String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney, canSplit, i+1,
+                    String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney, canSplit && playerHands.size() == 1, i+1,
                             playerHands.size());
                     isFirstHand = false;
                     if (choice.equals(HIT)) {
@@ -351,7 +355,9 @@ public class BlackJack {
                     } else if (choice.equals(DOUBLE)) {
                         playerCash -= bet;
                         bet += bet;
-                        System.out.printf("You doubled, upping the stakes! New bet amount: %d\n", bet);
+                        playerCards.add(deck.drawCard());
+                        printTable(dealerHidden, playerHands, visualizer);
+                        System.out.printf("You doubled, upping the stakes and taking exactly one more card! New bet amount: %d\n", bet);
                     } else if (choice.equals(SPLIT)) {
                         playerCash -= bet;
                         splitHand(playerHands, deck);
@@ -361,30 +367,9 @@ public class BlackJack {
                         handStands.set(i, true);
                     }
                 }
-                // first round has stand, hit (split, double)
-                String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney);
-                isFirstHand = false;
-                if (choice.equals(HIT)) {
-                    printTableHit(dealerHidden, playerCards, visualizer);
-                    System.out.println("You hit!");
-                    playerCards.add(deck.drawCard());
-                    printTable(dealerHidden, playerCards, visualizer);
 
-                } else if (choice.equals(DOUBLE)) {
-                    playerCash -= bet;
-                    bet += bet;
-                    playerCards.add(deck.drawCard());
-                    printTable(dealerHidden, playerCards, visualizer);
-                    System.out.printf("You doubled, upping the stakes and taking exactly one more card! New bet amount: %d\n", bet);
-                    try {
-                        Thread.sleep(2000);
-                    } catch (Exception e) {}
-                    break;
-                } else if (choice.equals(SPLIT)) {
-                    //TODO: implement this
-                } else { // stand
-                    break;
-                }
+
+
 
             }
 
