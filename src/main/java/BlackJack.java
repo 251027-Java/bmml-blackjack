@@ -198,7 +198,7 @@ public class BlackJack {
         System.out.println(String.format("Player Hand:"));
         vis.printHand_with_hit(player, 0);
         try {
-            Thread.sleep(500);
+            Thread.sleep(250);
         } catch (Exception e) {}
         clearScreen();
         System.out.println(String.format("Dealer Hand:"));
@@ -206,7 +206,7 @@ public class BlackJack {
         System.out.println(String.format("Player Hand:"));
         vis.printHand_with_hit(player, 1);
         try {
-            Thread.sleep(500);
+            Thread.sleep(250);
         } catch (Exception e) {}
     }
 
