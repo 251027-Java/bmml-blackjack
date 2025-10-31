@@ -133,7 +133,7 @@ public class BlackJack {
         return 0;
     }
 
-    private static boolean checkPlayNextHand (int playerCash, int startingCash, Scanner scan) {
+    private static boolean checkPlayNextHand (Scanner scan) {
         boolean keepPlaying = false;
         boolean invalidInput = true;
         do {
@@ -142,17 +142,7 @@ public class BlackJack {
             if (continueInput.equalsIgnoreCase("Y")) {
                 keepPlaying = true;
                 invalidInput = false;
-            } else if (continueInput.equalsIgnoreCase("n")) {
-                int netCash = playerCash - startingCash;
-                if (netCash < 0){
-                    System.out.printf("Yikes! You lost %d dollars.\n", Math.abs(netCash));
-                }
-                else if (netCash == 0){
-                    System.out.println("You went dead even.");
-                }
-                else {
-                    System.out.printf("Congrats! You won %d dollars.\n", (netCash));
-                }
+            } else if ( continueInput.equalsIgnoreCase("n")) {
                 invalidInput = false;
             } else {
                 System.out.println("Invalid input, please enter 'Y' or 'n'");
@@ -267,11 +257,6 @@ public class BlackJack {
                 Thread.sleep(500);
             } catch (Exception e) {}
 
-            //
-
-            // visualize cards, dealer only shows one
-//            System.out.println(String.format("Dealer Hand: %s", String.valueOf(dealerCards)));
-//            System.out.println(String.format("Player Hand: %s", String.valueOf(playerCards)));
             printTable(dealerHidden, playerCards, visualizer);
 
             // If dealer has an Ace, ask player if they want insurance
@@ -300,17 +285,14 @@ public class BlackJack {
             while (scoreHand(playerCards) < 21) { // only continue if player hasn't already won
 
                 // first round has stand, hit (split, double)
-                // 1, 2, 3, 4 as options
                 String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney);
                 isFirstHand = false;
                 if (choice.equals(HIT)) {
                     printTableHit(dealerHidden, playerCards, visualizer);
                     System.out.println("You hit!");
                     playerCards.add(deck.drawCard());
-                    //TODO visualize hand
-                    //System.out.println("\n\n");
                     printTable(dealerHidden, playerCards, visualizer);
-                        //Visualize entire 'table' including dealer hand and my hand
+
                 } else if (choice.equals(DOUBLE)) {
                     playerCash -= bet;
                     bet += bet;
@@ -323,21 +305,13 @@ public class BlackJack {
 
             }
 
-            // **DEALER STILL NEEDS TO PLAY HAND SINCE BOTH CAN BUST AND OUTCOME WOULD BE A PUSH**
-            // immediately end, no need to show dealer cards
-            //boolean handActive = !(scoreHand(playerCards) > 21) ;
-
             // Dealer play
             while (scoreHand(dealerCards) < 17) {
                 printTable(dealerCards, playerCards, visualizer);
                 dealerCards.add(deck.drawCard());
                 try {
                     Thread.sleep(1000);
-                } catch (Exception e) {
-                    continue;
-                }
-                //TODO visualize hand actually not sure we need it here
-                    // visualize 'table'
+                } catch (Exception e) {}
             }
             // determine outcome of hand
             int dealerScore = scoreHand(dealerCards);
@@ -351,16 +325,22 @@ public class BlackJack {
             deck.reset();
 
             System.out.printf("You now have %d dollars left.\n", playerCash);
-            if (playerCash == 0) break;
+            if (playerCash < minBetAmount) break;
 
             // see if player wants to quit (take hypothetical money home)
-            if (!checkPlayNextHand(playerCash,STARTING_CASH, scan)) break;
+            if (!checkPlayNextHand(scan)) break;
         }
 
-        // if player out of money, game over!
-        if (playerCash <= 0) {
-            System.out.println("You are out of money");
-            System.out.println("GAME OVER");
+        int netCash = playerCash - STARTING_CASH;
+        if (netCash < 0){
+            System.out.printf("Yikes! You lost %d dollars.\n", Math.abs(netCash));
         }
+        else if (netCash == 0){
+            System.out.println("You went dead even.");
+        }
+        else {
+            System.out.printf("Congrats! You won %d dollars.\n", (netCash));
+        }
+        System.out.println("GAME OVER");
     }
 }
