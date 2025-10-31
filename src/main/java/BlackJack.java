@@ -142,13 +142,13 @@ public class BlackJack {
             } else if (continueInput.equalsIgnoreCase("n")) {
                 int netCash = playerCash - startingCash;
                 if (netCash < 0){
-                    System.out.printf("Yikes! You lost %d dollars.", Math.abs(netCash));
+                    System.out.printf("Yikes! You lost %d dollars.\n", Math.abs(netCash));
                 }
                 else if (netCash == 0){
                     System.out.println("You went dead even.");
                 }
                 else {
-                    System.out.printf("Congrats! You took home %d dollars.", (netCash));
+                    System.out.printf("Congrats! You won %d dollars.\n", (netCash));
                 }
                 invalidInput = false;
             } else {
