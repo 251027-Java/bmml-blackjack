@@ -1,11 +1,10 @@
+import java.awt.image.AreaAveragingScaleFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
 public class BlackJack {
-
-    // private int currentBet;
     private static String DOUBLE = "double";
     private static String HIT = "hit";
     private static String STAND = "stand";
@@ -27,7 +26,9 @@ public class BlackJack {
                 continue;
             }
             if ((bet < min_bet_amount) || (bet > playerCash)) {
-                System.out.println(String.format("Not a valid bet amount. Minimum bet amount is %d and Max bet amount is %d", min_bet_amount, playerCash));
+                System.out.println(
+                        String.format("Not a valid bet amount. Minimum bet amount is %d and Max bet amount is %d",
+                                min_bet_amount, playerCash));
             } else {
                 invalidInput = false;
             }
@@ -35,8 +36,14 @@ public class BlackJack {
         return bet;
     }
 
-    private static String getUserPlay(Scanner scan, boolean isFirstHand, boolean hasDoubleMoney,
-                                      boolean canSplit, int handNumber, int numberOfHands) {
+    private static String getUserPlay(
+            Scanner scan,
+            boolean isFirstHand,
+            boolean hasDoubleMoney,
+            boolean canSplit,
+            int handNumber,
+            int numberOfHands
+    ) {
         // Gets the players play choice
         boolean invalidInput = true;
 
@@ -54,25 +61,17 @@ public class BlackJack {
         do {
             if (numberOfHands == 1) {
                 System.out.println(String.format("Play options are : %s", String.valueOf(playerOptions)));
-                System.out.print("What do you want to do : ");
-                option = scan.nextLine();
-                option = option.toLowerCase().strip();
-                if (!playerOptions.contains(option)) {
-                    System.out.println("\tNot a valid choice");
-                } else {
-                    invalidInput = false;
-                }
             } else {
                 System.out.println(String.format("Play options for hand %d are : %s",
                         handNumber, String.valueOf(playerOptions)));
-                System.out.print("What do you want to do : ");
-                option = scan.nextLine();
-                option = option.toLowerCase().strip();
-                if (!playerOptions.contains(option)) {
-                    System.out.println("\tNot a valid choice");
-                } else {
-                    invalidInput = false;
-                }
+            }
+            System.out.print("What do you want to do : ");
+            option = scan.nextLine();
+            option = option.toLowerCase().strip();
+            if (!playerOptions.contains(option)) {
+                System.out.println("\tNot a valid choice");
+            } else {
+                invalidInput = false;
             }
         } while (invalidInput);
 
@@ -116,7 +115,14 @@ public class BlackJack {
         return score;
     }
     
-    private static int calculateHandOutcome(int bet, int playerScore, int dealerScore, boolean split, boolean isFirstHand, int handSize) {
+    private static int calculateHandOutcome(
+            int bet,
+            int playerScore,
+            int dealerScore,
+            boolean split,
+            boolean isFirstHand,
+            int handSize
+    ) {
         String handText = "";
 
         if (split) {
@@ -132,7 +138,6 @@ public class BlackJack {
         }
 
         if (playerScore == 21 && handSize == 2) { // You win + blackjack payout
-            // TODO: fix this
             System.out.println(handText + "BlackJack! You win!\n");
             return (bet * 5) / 2;
         }
@@ -173,25 +178,36 @@ public class BlackJack {
         System.out.flush();
     }
 
-    private static void printTable(ArrayList<String> dealer,
-                                   ArrayList<ArrayList<String>> playerHands,
-                                   Visualizer vis) {
+    private static void printTable(
+            ArrayList<String> dealer,
+            ArrayList<ArrayList<String>> playerHands,
+            Visualizer vis,
+            ArrayList<Boolean> playerStands
+    ) {
         clearScreen();
         System.out.println(String.format("Dealer Hand:"));
         vis.printHand(dealer);
         for (int i=0; i < playerHands.size(); i++) {
             if (playerHands.size() == 1) {
                 System.out.println(String.format("Player Hand:"));
-                vis.printHand(playerHands.get(i));
+                if (playerStands.get(i)) {
+                    vis.printHand_with_stand(playerHands.get(i));
+                } else {
+                    vis.printHand(playerHands.get(i));    
+                }
+                
             } else {
                 System.out.printf("Player Hand %d:\n", i+1);
-                vis.printHand(playerHands.get(i));
+                if (playerStands.get(i)) {
+                    vis.printHand_with_stand(playerHands.get(i));
+                } else {
+                    vis.printHand(playerHands.get(i));
+                }
             }
         }
     }
 
-    private static void splitHand(ArrayList<ArrayList<String>> playerHands,
-                                                   Deck deck) {
+    private static void splitHand(ArrayList<ArrayList<String>> playerHands, Deck deck) {
 
         ArrayList<String> playerSplitCards = new ArrayList<>();
         ArrayList<String> playerCards = playerHands.getFirst();
@@ -204,7 +220,13 @@ public class BlackJack {
 
     }
 
-    private static void printTableHitFrame(ArrayList<String> dealer, ArrayList<ArrayList<String>> playerHands, Visualizer vis, int hitIndex, int frameIndex) {
+    private static void printTableHitFrame(
+            ArrayList<String> dealer,
+            ArrayList<ArrayList<String>> playerHands,
+            Visualizer vis,
+            int hitIndex,
+            int frameIndex
+    ) {
         clearScreen();
         System.out.println(String.format("Dealer Hand:"));
         vis.printHand(dealer);
@@ -218,7 +240,13 @@ public class BlackJack {
         }
     }
 
-    private static void printTableHit(ArrayList<String> dealer, ArrayList<ArrayList<String>> playerHands, Visualizer vis, int hitIndex) {
+    private static void printTableHit(
+            ArrayList<String> dealer,
+            ArrayList<ArrayList<String>> playerHands,
+            ArrayList<Boolean> handStands,
+            Visualizer vis,
+            int hitIndex
+    ) {
 
         printTableHitFrame(dealer, playerHands, vis, hitIndex, 0);
         try {
@@ -237,15 +265,24 @@ public class BlackJack {
         try {
             Thread.sleep(250);
         } catch (Exception e) {}
+        printTable(dealer, playerHands, vis, handStands);
     }
 
-    private static boolean handNotOver(ArrayList<ArrayList<String>> playerHands, ArrayList<Boolean> handStands){
-        return (scoreHand(playerHands.getFirst()) < 21 && playerHands.size()==1) ||
-                (scoreHand(playerHands.getFirst()) < 21 && scoreHand(playerHands.getFirst()) < 21) ||
-                (scoreHand(playerHands.getLast()) < 21 && handStands.getLast());
+    private static boolean handOver(
+            ArrayList<ArrayList<String>> playerHands,
+            ArrayList<Boolean> handStands
+    ){
+        return (scoreHand(playerHands.getFirst()) >= 21 || handStands.getFirst()) &&
+                (playerHands.size()==1 ||
+                (scoreHand(playerHands.getLast()) >= 21 || handStands.getLast()));
     }
 
-    private static void printTableStand(ArrayList<String> dealer, ArrayList<ArrayList<String>> player, Visualizer vis, int standIndex) {
+    private static void printTableStand(
+            ArrayList<String> dealer,
+            ArrayList<ArrayList<String>> player,
+            Visualizer vis,
+            int standIndex
+    ) {
         clearScreen();
         System.out.println(String.format("Dealer Hand:"));
         vis.printHand(dealer);
@@ -269,6 +306,44 @@ public class BlackJack {
         } catch (Exception e) {}
     }
 
+    private static void dealBeginningCards(
+            ArrayList<String> dealerCards,
+            ArrayList<String> dealerHidden,
+            ArrayList<ArrayList<String>> playerHands,
+            ArrayList<Boolean> handStands,
+            Deck deck,
+            Visualizer visualizer
+    ) {
+        ArrayList<String> playerCards = playerHands.getFirst();
+        dealerCards.add(deck.drawCard());
+        dealerHidden.add(dealerCards.getFirst());
+        printTable(dealerHidden, playerHands, visualizer, handStands);
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {}
+
+//        playerCards.add(deck.drawCard());
+        playerCards.add("AS");
+        clearScreen();
+        printTable(dealerHidden, playerHands, visualizer, handStands);
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {}
+
+        dealerCards.add(deck.drawCard());
+        dealerHidden.add("Blank");
+        clearScreen();
+        printTable(dealerHidden, playerHands, visualizer, handStands);
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {}
+
+//        playerCards.add(deck.drawCard());
+        playerCards.add("AS");
+        clearScreen();
+        printTable(dealerHidden, playerHands, visualizer, handStands);
+    }
+
     public static void main(String[] args) {
         final int STARTING_CASH = 1000;
         Scanner scan = new Scanner(System.in);
@@ -285,7 +360,7 @@ public class BlackJack {
         Deck deck = new Deck(2);
 
         // Simulate rounds
-        while (playerCash > 0) {
+        while (playerCash >= minBetAmount) {
 
             // Initialize Round Hands
             ArrayList<String> dealerCards = new ArrayList<>();
@@ -305,34 +380,14 @@ public class BlackJack {
             playerCash -= bet;
 
             // Deal cards
-            dealerCards.add(deck.drawCard());
-            dealerHidden.add(dealerCards.getFirst());
-            printTable(dealerHidden, playerHands, visualizer);
-            try {
-                Thread.sleep(500);
-            } catch (Exception e) {}
-
-            playerCards.add(deck.drawCard());
-            printTable(dealerHidden, playerHands, visualizer);
-            try {
-                Thread.sleep(500);
-            } catch (Exception e) {}
-
-            dealerCards.add(deck.drawCard());
-            dealerHidden.add("Blank");
-            printTable(dealerHidden, playerHands, visualizer);
-            try {
-                Thread.sleep(500);
-            } catch (Exception e) {}
-
-            playerCards.add(deck.drawCard());
-            printTable(dealerHidden, playerHands, visualizer);
-            try {
-                Thread.sleep(500);
-            } catch (Exception e) {}
-
-            printTable(dealerHidden, playerHands, visualizer);
-            
+            dealBeginningCards(
+                    dealerCards,
+                    dealerHidden,
+                    playerHands,
+                    handStands,
+                    deck,
+                    visualizer
+            );
 
             // If dealer has an Ace, ask player if they want insurance
             if (dealerCards.getFirst().charAt(0) == 'A'){
@@ -355,76 +410,93 @@ public class BlackJack {
             }
 
             boolean isFirstHand = true;
-            boolean canSplit = playerHands.getFirst().getFirst().charAt(0) == playerHands.getFirst().getLast().charAt(0);
+            boolean canSplit = playerCards.getFirst().charAt(0) == playerCards.getLast().charAt(0);
 
             // player could immediately win, check for win
-            while (handNotOver(playerHands, handStands)) { //
-
-
+            while (!handOver(playerHands, handStands)) { //
                 for (int i =0; i< playerHands.size(); i++) {
                     int handScore = scoreHand(playerHands.get(i));
                     if (handStands.get(i) || handScore >= 21) {
                         continue;
                     }
-                    String choice = getUserPlay(scan, isFirstHand, hasDoubleMoney, canSplit && playerHands.size() == 1, i+1,
-                            playerHands.size());
+                    String choice = getUserPlay(
+                            scan,
+                            isFirstHand,
+                            hasDoubleMoney,
+                            canSplit && playerHands.size() == 1, // only allowing splitting for first instance
+                            i + 1, // 1-indexed for printing
+                            playerHands.size()
+                            );
                     isFirstHand = false;
                     if (choice.equals(HIT)) {
 
                         System.out.println("You hit!");
                         playerHands.get(i).add(deck.drawCard());
 
-                        printTableHit(dealerHidden, playerHands, visualizer, i);
+                        printTableHit(dealerHidden, playerHands, handStands, visualizer, i);
                     } else if (choice.equals(DOUBLE)) {
                         playerCash -= bet;
                         bet += bet;
                         playerHands.get(i).add(deck.drawCard());
                         handStands.set(i, true);
-                        printTable(dealerHidden, playerHands, visualizer);
-                        System.out.printf("You doubled, upping the stakes and taking exactly one more card! New bet amount: %d\n", bet);
+                        printTable(dealerHidden, playerHands, visualizer, handStands);
+                        System.out.printf(
+                                "You doubled, upping the stakes and taking exactly one more card! New bet amount: %d\n",
+                                bet
+                        );
                     } else if (choice.equals(SPLIT)) {
                         playerCash -= bet;
                         splitHand(playerHands, deck);
                         i--;
-                        printTable(dealerHidden, playerHands, visualizer);
+                        printTable(dealerHidden, playerHands, visualizer, handStands);
                     } else { // stand
                         handStands.set(i, true);
                         printTableStand(dealerHidden, playerHands, visualizer, i);
                     }
                 }
-
-
-
-
             }
 
+            int playerScore1 = scoreHand(playerHands.getFirst());
+            int playerScore2 = scoreHand(playerHands.getLast());
+            boolean playerHasActiveHand = playerScore1 <= 21 || playerScore2 <= 21;
+
             // Dealer play
-            while (scoreHand(dealerCards) < 17) {
-                printTable(dealerCards, playerHands, visualizer);
+            int dealerScore = scoreHand(dealerCards);
+            while (dealerScore < 17 && playerHasActiveHand) {
+                printTable(dealerCards, playerHands, visualizer, handStands);
                 dealerCards.add(deck.drawCard());
                 try {
                     Thread.sleep(1000);
                 } catch (Exception e) {}
+                dealerScore = scoreHand(dealerCards);
             }
-            // determine outcome of hand
-            int dealerScore = scoreHand(dealerCards);
-            int playerScore1 = scoreHand(playerHands.getFirst());
-            int playerScore2 = scoreHand(playerHands.getLast());
 
-            printTable(dealerCards, playerHands, visualizer);
+            printTable(dealerCards, playerHands, visualizer, handStands);
 
             // Pay player
-            playerCash += calculateHandOutcome(bet, playerScore1, dealerScore, playerHands.size() == 2, true, playerHands.getFirst().size());
+            playerCash += calculateHandOutcome(
+                    bet,
+                    playerScore1,
+                    dealerScore,
+                    playerHands.size() == 2,
+                    true,
+                    playerHands.getFirst().size()
+            );
             if (playerHands.size() != 1) {
-                playerCash += calculateHandOutcome(bet, playerScore2, dealerScore, playerHands.size() == 2, false, playerHands.getLast().size());
+                playerCash += calculateHandOutcome(
+                        bet,
+                        playerScore2,
+                        dealerScore,
+                        playerHands.size() == 2,
+                        false,
+                        playerHands.getLast().size()
+                );
             }
 
             deck.reset();
 
             System.out.printf("You now have %d dollars left.\n", playerCash);
-            if (playerCash < minBetAmount) break;
-
-            // see if player wants to quit (take hypothetical money home)
+            // see if player quits (take hypothetical money home)
             if (!checkPlayNextHand(scan)) break;
         }
 
