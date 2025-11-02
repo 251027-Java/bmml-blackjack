@@ -204,37 +204,36 @@ public class BlackJack {
 
     }
 
-    private static void printTableHit(ArrayList<String> dealer, ArrayList<String> player, Visualizer vis) {
+    private static void printTableHitFrame(ArrayList<String> dealer, ArrayList<ArrayList<String>> playerHands, Visualizer vis, int hitIndex, int frameIndex) {
         clearScreen();
         System.out.println(String.format("Dealer Hand:"));
         vis.printHand(dealer);
-        System.out.println(String.format("Player Hand:"));
-        vis.printHand_with_hit(player, 0);
+        for (int i = 0; i < playerHands.size(); i++) {
+            System.out.println(String.format("Player Hand %d:", i+1));
+            if (hitIndex == i) {
+                vis.printHand_with_hit(playerHands.get(i), frameIndex);
+            } else {
+                vis.printHand(playerHands.get(i));
+            }
+        }
+    }
+
+    private static void printTableHit(ArrayList<String> dealer, ArrayList<ArrayList<String>> playerHands, Visualizer vis, int hitIndex) {
+
+        printTableHitFrame(dealer, playerHands, vis, hitIndex, 0);
         try {
             Thread.sleep(250);
         } catch (Exception e) {}
-        clearScreen();
-        System.out.println(String.format("Dealer Hand:"));
-        vis.printHand(dealer);
-        System.out.println(String.format("Player Hand:"));
-        vis.printHand_with_hit(player, 1);
+        printTableHitFrame(dealer, playerHands, vis, hitIndex, 1);
         try {
             Thread.sleep(250);
         } catch (Exception e) {}
 
-        clearScreen();
-        System.out.println(String.format("Dealer Hand:"));
-        vis.printHand(dealer);
-        System.out.println(String.format("Player Hand:"));
-        vis.printHand_with_hit(player, 0);
+        printTableHitFrame(dealer, playerHands, vis, hitIndex, 0);
         try {
             Thread.sleep(250);
         } catch (Exception e) {}
-        clearScreen();
-        System.out.println(String.format("Dealer Hand:"));
-        vis.printHand(dealer);
-        System.out.println(String.format("Player Hand:"));
-        vis.printHand_with_hit(player, 1);
+        printTableHitFrame(dealer, playerHands, vis, hitIndex, 1);
         try {
             Thread.sleep(250);
         } catch (Exception e) {}
@@ -244,6 +243,30 @@ public class BlackJack {
         return (scoreHand(playerHands.getFirst()) < 21 && playerHands.size()==1) ||
                 (scoreHand(playerHands.getFirst()) < 21 && scoreHand(playerHands.getFirst()) < 21) ||
                 (scoreHand(playerHands.getLast()) < 21 && handStands.getLast());
+    }
+
+    private static void printTableStand(ArrayList<String> dealer, ArrayList<ArrayList<String>> player, Visualizer vis, int standIndex) {
+        clearScreen();
+        System.out.println(String.format("Dealer Hand:"));
+        vis.printHand(dealer);
+        if (player.size() == 1) {
+            System.out.println(String.format("Player Hand:"));
+            vis.printHand_with_stand(player.getFirst());
+        } else {
+            for (int i = 0; i < player.size(); i++) {
+                System.out.println(String.format("Player Hand %d:", i+1));
+                if (i == standIndex){
+                    vis.printHand_with_stand(player.get(i));
+                }else {
+                    vis.printHand(player.get(i));
+                }
+
+            }
+        }
+
+        try {
+            Thread.sleep(750);
+        } catch (Exception e) {}
     }
 
     public static void main(String[] args) {
@@ -351,11 +374,12 @@ public class BlackJack {
                         System.out.println("You hit!");
                         playerHands.get(i).add(deck.drawCard());
 
-                        printTable(dealerHidden, playerHands, visualizer);
+                        printTableHit(dealerHidden, playerHands, visualizer, i);
                     } else if (choice.equals(DOUBLE)) {
                         playerCash -= bet;
                         bet += bet;
-                        playerCards.add(deck.drawCard());
+                        playerHands.get(i).add(deck.drawCard());
+                        handStands.set(i, true);
                         printTable(dealerHidden, playerHands, visualizer);
                         System.out.printf("You doubled, upping the stakes and taking exactly one more card! New bet amount: %d\n", bet);
                     } else if (choice.equals(SPLIT)) {
@@ -365,6 +389,7 @@ public class BlackJack {
                         printTable(dealerHidden, playerHands, visualizer);
                     } else { // stand
                         handStands.set(i, true);
+                        printTableStand(dealerHidden, playerHands, visualizer, i);
                     }
                 }
 
