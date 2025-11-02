@@ -323,7 +323,7 @@ public class BlackJack {
         } catch (Exception e) {}
 
 //        playerCards.add(deck.drawCard());
-        playerCards.add("AS");
+        playerCards.add(deck.drawCard());
         clearScreen();
         printTable(dealerHidden, playerHands, visualizer, handStands);
         try {
@@ -339,7 +339,7 @@ public class BlackJack {
         } catch (Exception e) {}
 
 //        playerCards.add(deck.drawCard());
-        playerCards.add("AS");
+        playerCards.add(deck.drawCard());
         clearScreen();
         printTable(dealerHidden, playerHands, visualizer, handStands);
     }
