@@ -496,6 +496,12 @@ public class BlackJack {
             deck.reset();
 
             System.out.printf("You now have %d dollars left.\n", playerCash);
+
+            if (playerCash < minBetAmount) {
+                System.out.println("You can't make the minimum bet... :( ");
+                break;
+            }
+
             // see if player quits (take hypothetical money home)
             if (!checkPlayNextHand(scan)) break;
         }
